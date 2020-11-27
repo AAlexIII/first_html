@@ -1,58 +1,79 @@
 import subprocess
+import platform
 import argparse
-import time
+import re
+import openpyxl
 
 
-def give_time(f):
-
-    def d(arg1, arg2):
-        start_time = time.time()
-        r = f(arg1, arg2)
-        print("--- %s seconds ---" % (time.time() - start_time))
-        return r
-    return d
-
-def print_hi(name):
-    reply = subprocess.run('ping -n 2 195.201.201.32 195.201.201.32')
-    print(reply)
-    print(reply.args)
-    print(reply.check_returncode)
-    print(reply.returncode)
-    print(dir(reply))
-
-
-@give_time
-def ping_ip(ip_address, count):
+def ping_ip(ip_address: str, count=1) -> (bool, str):
     """
     Ping IP address and return tuple:
-    On success: (return code = 0, command output)
-    On failure: (return code, error output (stderr))
+    On success:
+        * True
+        * command output (stdout)
+    On failure:
+        * False
+        * error output (stderr)
     """
-    reply = subprocess.run('ping -n {count} {ip}'
-                           .format(count=count, ip=ip_address),
-                           shell=True,
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE,
-                           encoding='cp866')
-    if reply.returncode == 0:
-        return True, reply.stdout
+    # для разных систем разные кодировки
+    if platform.system().lower() == "windows":
+        reply = subprocess.run(['ping', '-n ', str(count), ip_address],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               encoding='cp866')
     else:
-        return False, reply.stdout + reply.stderr
+        reply = subprocess.run(['ping', '-c', str(count), '-n', ip_address],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               encoding='utf-8')
+    # print(reply.stdout)
+    pink_ms = re.search(r'=\d*[ms,мс]', reply.stdout)
+    if reply.returncode == 0:
+        return True, reply.stdout[pink_ms.start() + 1:pink_ms.end() - 1]
+    else:
+        return False, ''
 
 
-# Press the green button in the gutter to run the script.
+def list_from_exel(file, paper) -> list:
+    if paper is None:
+        paper = 'Лист1'
+    l = []
+    k = 1
+    wb = openpyxl.load_workbook(filename=file, read_only=True)
+    sheet = wb[paper]
+    a = sheet.cell(row=k, column=1).value
+    while a is not None:
+        l.append(a)
+        k += 1
+        a = sheet.cell(row=k, column=1).value
+    return l
+
+
+def list_to_ping_list(l: list) -> [(str, str)]:
+    ll = []
+    for i in l:
+        ll.append(ping_ip(i))
+    return ll
+
+
 if __name__ == '__main__':
+    # для запуска из командной строки с аргументами
     parser = argparse.ArgumentParser(description='Ping script')
-
-    parser.add_argument('-a', action="store", dest="ip", )
-    parser.add_argument('-c', action="store", dest="count", default=2, type=int)
-
+    parser.add_argument('-a', action="store", dest="ip", type=str)  # '140.82.121.4'
+    parser.add_argument('-c', action="store", dest="count", default=1, type=int)
+    parser.add_argument('-f', action="store", dest="file", type=str)
+    parser.add_argument('-l', action="store", dest="list", type=str)
     args = parser.parse_args()
-    #print(args)
 
-    # rc, message = ping_ip(args.ip, args.count)
-
-    ping_ip("8.8.8.8", 1)
-    #print(message)rc, message = ping_ip("8.8.8.8", 2)
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    if args.ip:
+        go, ms = ping_ip(args.ip, args.count)
+        if go:
+            print(f'Ping {ms} мс')
+        else:
+            print(f'Ответ не вернулся')
+    if args.file:
+        if '.csv' in args.file or 'xlsx' in args.file:
+            ip_list = list_from_exel(args.file, args.list)
+            ping_list = list_to_ping_list(ip_list)
+            for i in range(len(ping_list) - 1):
+                print(f'{i}. {ping_list[i][0]} {ping_list[i][1]}')
