@@ -52,7 +52,11 @@ def list_from_exel(file, paper) -> list:
 def list_to_ping_list(l: list) -> [(str, str)]:
     ll = []
     for i in l:
-        ll.append(ping_ip(i))
+        t = ping_ip(i)
+        if t[0]:
+            ll.append((i, t[1]))
+        else:
+            ll.append((i, 'Ошибка соединения'))
     return ll
 
 
@@ -72,8 +76,8 @@ if __name__ == '__main__':
         else:
             print(f'Ответ не вернулся')
     if args.file:
-        if '.csv' in args.file or 'xlsx' in args.file:
+        if '.csv' in args.file or '.xlsx' in args.file:
             ip_list = list_from_exel(args.file, args.list)
             ping_list = list_to_ping_list(ip_list)
-            for i in range(len(ping_list) - 1):
-                print(f'{i}. {ping_list[i][0]} {ping_list[i][1]}')
+            for i in range(len(ping_list)):
+                print(f'{i+1}. {ping_list[i][0]} {ping_list[i][1]}')
