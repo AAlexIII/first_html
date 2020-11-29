@@ -19,4 +19,4 @@ def add_message(uuid):
     return jsonify({"uuid":uuid})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
