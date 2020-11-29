@@ -6,8 +6,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def hi():
-    return "Hello"
-    # return render_template('index.html')
+    # return "Hello"
+    return render_template('index.html')
 
 
 @app.route('/api/add_message/<uuid>', methods=['GET', 'POST'])
