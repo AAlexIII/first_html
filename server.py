@@ -6,7 +6,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def hi():
-    return render_template('index.html')
+    return "Hello"
+    # return render_template('index.html')
 
 
 @app.route('/api/add_message/<uuid>', methods=['GET', 'POST'])
@@ -17,6 +18,7 @@ def add_message(uuid):
         time.sleep(1)
     print (content['mytext'])
     return jsonify({"uuid":uuid})
+
 
 if __name__ == '__main__':
     app.run()
