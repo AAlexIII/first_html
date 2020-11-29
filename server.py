@@ -2,9 +2,13 @@ from flask import Flask, request, jsonify,render_template
 import asyncio
 import time
 app = Flask(__name__)
+
+
 @app.route('/')
 def hi():
-    return render_template('index.html',)
+    return render_template('index.html')
+
+
 @app.route('/api/add_message/<uuid>', methods=['GET', 'POST'])
 def add_message(uuid):
     content = request.json
