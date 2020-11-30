@@ -20,7 +20,7 @@ def hello():
 
 @app.route('/api/add_message/<uuid>', methods=['GET', 'POST'])
 def add_message(uuid):
-    p = ping_checker.server_ping(request.get_data().decode("utf-8"))
+    p = ping_checker.ping_ip(request.get_data().decode("utf-8"))
     return make_response(p[1], 200 if p[0] else 300)
     # return jsonify({"uuid":uuid})
 
