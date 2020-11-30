@@ -3,6 +3,7 @@ import platform
 import argparse
 import re
 import openpyxl
+import pythonping as pig
 
 
 def ping_ip(ip_address: str, count=1) -> (bool, str):
@@ -31,6 +32,17 @@ def ping_ip(ip_address: str, count=1) -> (bool, str):
     # reply.returncode
     if pink_ms is not None:
         return True, reply.stdout[pink_ms.start() + 1:pink_ms.end() - 1]
+    else:
+        return False, ''
+
+def server_ping(ip):
+    try:
+        text = str(pig.ping(ip, count=1))
+    except Exception:
+        return False, ''
+    pink_ms = re.search(r'in\s+\d*\.\d*[ms,мс]', text)
+    if pink_ms is not None:
+        return True, text[pink_ms.start() + 3:pink_ms.end() - 1]
     else:
         return False, ''
 
