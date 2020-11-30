@@ -37,15 +37,10 @@ def ping_ip(ip_address: str, count=1) -> (bool, str):
 
 def server_ping(ip):
     print(ip)
-    try:
-        text = str(pig.ping(ip, count=1))
-        print("====================")
-        print(text)
-        print("====================")
-    except Exception as e:
-        print(e)
-        print(e)
-        return False, ''
+    text = str(pig.ping(ip, count=1))
+    print("====================")
+    print(text)
+    print("====================")
     pink_ms = re.search(r'in\s+\d*\.\d*[ms,мс]', text)
     print(pink_ms)
     if pink_ms is not None:
