@@ -28,7 +28,8 @@ def ping_ip(ip_address: str, count=1) -> (bool, str):
                                encoding='utf-8')
     # print(reply.stdout)
     pink_ms = re.search(r'=\d*[ms,мс]', reply.stdout)
-    if reply.returncode == 0:
+    # reply.returncode
+    if pink_ms is not None:
         return True, reply.stdout[pink_ms.start() + 1:pink_ms.end() - 1]
     else:
         return False, ''
