@@ -3,7 +3,7 @@ import platform
 import argparse
 import re
 import openpyxl
-import pythonping as pig
+# import pythonping as pig
 
 
 def ping_ip(ip_address: str, count=1) -> (bool, str):
